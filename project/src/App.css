@@ -1,0 +1,65 @@
+/* App.css - Application Layout */
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+  font-family: var(--font-family-base, -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Inter', sans-serif);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  background-color: var(--color-bg-primary, #0f1015);
+  color: var(--color-text-primary, #e6e7eb);
+  width: 100%;
+  height: 100%;
+}
+
+#root {
+  width: 100%;
+  min-height: 100vh;
+  background-color: var(--color-bg-primary, #0f1015);
+  color: var(--color-text-primary, #e6e7eb);
+}
+
+code {
+  font-family: var(--font-family-mono, source-code-pro, Menlo, Monaco, Consolas, 'Courier New', monospace);
+}
+
+.app-wrapper {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background-color: var(--color-bg-primary, #0f1015);
+  color: var(--color-text-primary, #e6e7eb);
+  width: 100%;
+}
+
+.main-content {
+  flex: 1;
+  background-color: var(--color-bg-primary, #0f1015);
+  color: var(--color-text-primary, #e6e7eb);
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+button {
+  font-family: inherit;
+  cursor: pointer;
+}
+
+input,
+select,
+textarea {
+  font-family: inherit;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}

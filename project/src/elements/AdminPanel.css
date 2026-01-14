@@ -1,0 +1,367 @@
+.admin-panel-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.6);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 2000;
+  animation: fadeIn 0.2s ease;
+}
+
+.admin-panel-dialog {
+  background: linear-gradient(135deg, #1a1b1f 0%, #131415 100%);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 16px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4);
+  max-width: 900px;
+  width: 90%;
+  max-height: 80vh;
+  display: flex;
+  flex-direction: column;
+  animation: slideUp 0.3s ease;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes slideUp {
+  from {
+    transform: translateY(20px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.admin-panel-header {
+  padding: 1.5rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.admin-panel-header h2 {
+  margin: 0;
+  color: #eeeeee;
+  font-size: 1.5rem;
+  font-weight: 600;
+}
+
+.admin-panel-close {
+  background: none;
+  border: none;
+  color: #8a8f98;
+  cursor: pointer;
+  padding: 0.4rem;
+  border-radius: 6px;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.admin-panel-close:hover {
+  color: #eeeeee;
+  background-color: rgba(255, 255, 255, 0.08);
+}
+
+.admin-panel-tabs {
+  display: flex;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  padding: 0;
+  background: rgba(0, 0, 0, 0.2);
+}
+
+.admin-tab {
+  flex: 1;
+  padding: 1rem;
+  background: none;
+  border: none;
+  color: #8a8f98;
+  font-size: 0.95rem;
+  font-weight: 500;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.6rem;
+  transition: all 0.2s ease;
+  border-bottom: 3px solid transparent;
+}
+
+.admin-tab:hover {
+  color: #eeeeee;
+  background-color: rgba(255, 255, 255, 0.02);
+}
+
+.admin-tab.active {
+  color: #8b5cf6;
+  border-bottom-color: #8b5cf6;
+  background-color: rgba(139, 92, 246, 0.1);
+}
+
+.admin-panel-content {
+  flex: 1;
+  overflow-y: auto;
+  padding: 1.5rem;
+}
+
+.access-denied {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  padding: 3rem;
+  color: #ef4444;
+  text-align: center;
+}
+
+.access-denied svg {
+  opacity: 0.5;
+}
+
+.loading-text,
+.error-text,
+.empty-text {
+  text-align: center;
+  padding: 2rem;
+  color: #8a8f98;
+}
+
+.error-text {
+  color: #ef4444;
+}
+
+.admins-list,
+.users-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.admin-item,
+.user-item {
+  background: linear-gradient(135deg, #0f1015 0%, #0a0b0f 100%);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 12px;
+  padding: 1rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  transition: all 0.2s ease;
+}
+
+.admin-item:hover,
+.user-item:hover {
+  border-color: rgba(255, 255, 255, 0.12);
+  background: linear-gradient(135deg, #131519 0%, #0f1015 100%);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.admin-info,
+.user-info {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  flex: 1;
+  min-width: 0;
+}
+
+.admin-avatar,
+.user-avatar {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.08);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  color: #8a8f98;
+  overflow: hidden;
+}
+
+.admin-avatar img,
+.user-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.admin-details,
+.user-details {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  min-width: 0;
+}
+
+.admin-details h4,
+.user-details h4 {
+  margin: 0;
+  color: #eeeeee;
+  font-size: 0.95rem;
+  font-weight: 600;
+  word-break: break-word;
+}
+
+.admin-details p,
+.user-details p {
+  margin: 0;
+  color: #8a8f98;
+  font-size: 0.85rem;
+  word-break: break-word;
+}
+
+.admin-badge,
+.role-badge,
+.banned-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.75rem;
+  padding: 0.35rem 0.75rem;
+  border-radius: 6px;
+  font-weight: 600;
+  width: fit-content;
+  margin-top: 0.3rem;
+}
+
+.admin-badge {
+  background: rgba(139, 92, 246, 0.15);
+  color: #8b5cf6;
+}
+
+.role-badge {
+  background: rgba(16, 185, 129, 0.15);
+  color: #10b981;
+}
+
+.role-badge.donor {
+  background: rgba(59, 130, 246, 0.15);
+  color: #3b82f6;
+}
+
+.role-badge.recipient {
+  background: rgba(244, 114, 182, 0.15);
+  color: #f472b6;
+}
+
+.role-badge.courier,
+.role-badge.deliverer {
+  background: rgba(249, 115, 22, 0.15);
+  color: #f97316;
+}
+
+.banned-badge {
+  background: rgba(239, 68, 68, 0.15);
+  color: #ef4444;
+}
+
+.user-actions {
+  display: flex;
+  gap: 0.5rem;
+  flex-shrink: 0;
+}
+
+.btn-remove-admin,
+.btn-make-admin,
+.btn-ban,
+.btn-unban {
+  padding: 0.6rem 0.8rem;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.04);
+  color: #8a8f98;
+  cursor: pointer;
+  font-size: 0.9rem;
+  font-weight: 500;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  white-space: nowrap;
+}
+
+.btn-remove-admin:hover {
+  background: rgba(239, 68, 68, 0.15);
+  color: #ef4444;
+  border-color: rgba(239, 68, 68, 0.3);
+}
+
+.btn-make-admin:hover {
+  background: rgba(139, 92, 246, 0.15);
+  color: #8b5cf6;
+  border-color: rgba(139, 92, 246, 0.3);
+}
+
+.btn-ban:hover {
+  background: rgba(239, 68, 68, 0.15);
+  color: #ef4444;
+  border-color: rgba(239, 68, 68, 0.3);
+}
+
+.btn-unban:hover {
+  background: rgba(16, 185, 129, 0.15);
+  color: #10b981;
+  border-color: rgba(16, 185, 129, 0.3);
+}
+
+/* Scrollbar styling */
+.admin-panel-content::-webkit-scrollbar {
+  width: 8px;
+}
+
+.admin-panel-content::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.admin-panel-content::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 4px;
+}
+
+.admin-panel-content::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.16);
+}
+
+@media (max-width: 600px) {
+  .admin-panel-dialog {
+    width: 95%;
+    max-height: 90vh;
+  }
+
+  .admin-item,
+  .user-item {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .user-actions {
+    width: 100%;
+    margin-top: 0.5rem;
+  }
+
+  .btn-remove-admin,
+  .btn-make-admin,
+  .btn-ban,
+  .btn-unban {
+    flex: 1;
+  }
+}

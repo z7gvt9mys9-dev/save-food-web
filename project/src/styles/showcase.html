@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Design System Showcase - Save Food UI</title>
+  <link rel="stylesheet" href="./styles/system.css">
+  <style>
+    .showcase-container {
+      background: var(--color-bg-primary);
+      min-height: 100vh;
+      padding: var(--space-12);
+    }
+    
+    .showcase-section {
+      margin-bottom: var(--space-12);
+      background: var(--color-bg-secondary);
+      border: 1px solid var(--color-border-primary);
+      border-radius: var(--radius-xl);
+      padding: var(--space-6);
+    }
+    
+    .showcase-section h2 {
+      margin-top: 0;
+      color: var(--color-accent-primary);
+      border-bottom: 1px solid var(--color-border-secondary);
+      padding-bottom: var(--space-4);
+    }
+    
+    .showcase-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: var(--space-4);
+      margin-top: var(--space-4);
+    }
+    
+    .showcase-item {
+      background: var(--color-surface-default);
+      border: 1px solid var(--color-border-primary);
+      border-radius: var(--radius-md);
+      padding: var(--space-4);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100px;
+      gap: var(--space-2);
+      flex-wrap: wrap;
+    }
+  </style>
+</head>
+<body>
+
+<div class="showcase-container">
+  <h1 style="text-align: center; color: var(--color-accent-primary); margin-bottom: var(--space-12);">
+    🍽️ Save Food Design System Showcase
+  </h1>
+
+  <!-- BUTTONS -->
+  <section class="showcase-section">
+    <h2>Buttons</h2>
+    
+    <div class="showcase-grid">
+      <div class="showcase-item">
+        <button class="btn btn-primary">Primary</button>
+      </div>
+      <div class="showcase-item">
+        <button class="btn btn-secondary">Secondary</button>
+      </div>
+      <div class="showcase-item">
+        <button class="btn btn-ghost">Ghost</button>
+      </div>
+      <div class="showcase-item">
+        <button class="btn btn-destructive">Delete</button>
+      </div>
+    </div>
+    
+    <h3 style="margin-top: var(--space-6);">Sizes</h3>
+    <div class="showcase-grid">
+      <div class="showcase-item">
+        <button class="btn btn-sm btn-primary">Small</button>
+      </div>
+      <div class="showcase-item">
+        <button class="btn btn-primary">Regular</button>
+      </div>
+      <div class="showcase-item">
+        <button class="btn btn-lg btn-primary">Large</button>
+      </div>
+      <div class="showcase-item">
+        <button class="btn btn-primary" disabled>Disabled</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- INPUTS -->
+  <section class="showcase-section">
+    <h2>Inputs</h2>
+    
+    <div style="max-width: 500px;">
+      <div class="form-group">
+        <label class="label label-required">Email Address</label>
+        <input type="email" class="input" placeholder="name@example.com" />
+        <span class="label-hint">We'll verify your email address</span>
+      </div>
+      
+      <div class="form-group">
+        <label class="label">Password</label>
+        <input type="password" class="input" placeholder="••••••••" />
+      </div>
+      
+      <div class="form-group">
+        <label class="label">Message</label>
+        <textarea class="input" placeholder="Enter your message..." rows="4"></textarea>
+      </div>
+      
+      <div class="form-group">
+        <label class="label">Category</label>
+        <select class="input">
+          <option>Choose...</option>
+          <option>Food Donation</option>
+          <option>Delivery</option>
+          <option>Distribution</option>
+        </select>
+      </div>
+      
+      <div class="form-group">
+        <label class="label">Error Example</label>
+        <input type="email" class="input input-error" value="invalid-email" />
+        <p class="error-message">Invalid email format</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- CARDS -->
+  <section class="showcase-section">
+    <h2>Cards</h2>
+    
+    <div class="showcase-grid" style="grid-template-columns: 1fr;">
+      <div class="card">
+        <div class="card-header">
+          <h3>Donation Campaign</h3>
+          <button class="btn btn-ghost btn-sm">Menu</button>
+        </div>
+        <div class="card-body">
+          <p>Help us distribute fresh produce to local communities. Every donation makes a difference.</p>
+          <p style="margin-top: var(--space-3); font-size: var(--font-size-sm); color: var(--color-text-secondary);">
+            Progress: 234 of 500 kg collected
+          </p>
+        </div>
+        <div class="card-footer">
+          <button class="btn btn-secondary">Learn More</button>
+          <button class="btn btn-primary">Donate Now</button>
+        </div>
+      </div>
+    </div>
+
+    <h3 style="margin-top: var(--space-6);">Card Variants</h3>
+    <div class="showcase-grid" style="grid-template-columns: repeat(3, 1fr);">
+      <div class="card card-compact">
+        <h4>Compact Card</h4>
+        <p>Less padding for dense layouts</p>
+      </div>
+      <div class="card card-normal">
+        <h4>Normal Card</h4>
+        <p>Standard padding (default)</p>
+      </div>
+      <div class="card card-spacious">
+        <h4>Spacious Card</h4>
+        <p>Extra padding for emphasis</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- BADGES -->
+  <section class="showcase-section">
+    <h2>Badges & Status</h2>
+    
+    <div class="showcase-grid">
+      <div class="showcase-item">
+        <span class="badge">Default</span>
+      </div>
+      <div class="showcase-item">
+        <span class="badge badge-success">Success</span>
+      </div>
+      <div class="showcase-item">
+        <span class="badge badge-warning">Warning</span>
+      </div>
+      <div class="showcase-item">
+        <span class="badge badge-error">Error</span>
+      </div>
+      <div class="showcase-item">
+        <span class="badge badge-info">Info</span>
+      </div>
+      <div class="showcase-item">
+        <span class="badge badge-outline">Outline</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- AVATARS -->
+  <section class="showcase-section">
+    <h2>Avatars</h2>
+    
+    <div class="showcase-grid">
+      <div class="showcase-item">
+        <div class="avatar avatar-sm">JD</div>
+      </div>
+      <div class="showcase-item">
+        <div class="avatar">JD</div>
+      </div>
+      <div class="showcase-item">
+        <div class="avatar avatar-lg">JD</div>
+      </div>
+    </div>
+
+    <h3 style="margin-top: var(--space-6);">Avatar Group</h3>
+    <div class="showcase-item" style="justify-content: flex-start;">
+      <div class="avatar-group">
+        <div class="avatar">A</div>
+        <div class="avatar">B</div>
+        <div class="avatar">C</div>
+        <div class="avatar">+2</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- TABLES -->
+  <section class="showcase-section">
+    <h2>Tables</h2>
+    
+    <table class="table table-striped" style="width: 100%; margin-top: var(--space-4);">
+      <thead>
+        <tr>
+          <th>Project</th>
+          <th>Status</th>
+          <th>Progress</th>
+          <th>Updated</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>Food Bank Initiative</strong></td>
+          <td><span class="badge badge-success">Active</span></td>
+          <td>75%</td>
+          <td>2 hours ago</td>
+        </tr>
+        <tr>
+          <td><strong>Community Kitchen</strong></td>
+          <td><span class="badge badge-info">Planning</span></td>
+          <td>40%</td>
+          <td>1 day ago</td>
+        </tr>
+        <tr>
+          <td><strong>Rescue & Redistribute</strong></td>
+          <td><span class="badge badge-warning">On Hold</span></td>
+          <td>60%</td>
+          <td>3 days ago</td>
+        </tr>
+        <tr>
+          <td><strong>Food Waste Reduction</strong></td>
+          <td><span class="badge badge-success">Complete</span></td>
+          <td>100%</td>
+          <td>1 week ago</td>
+        </tr>
+      </tbody>
+    </table>
+  </section>
+
+  <!-- TYPOGRAPHY -->
+  <section class="showcase-section">
+    <h2>Typography</h2>
+    
+    <h1>Heading 1 (24px, Semibold)</h1>
+    <h2>Heading 2 (20px, Semibold)</h2>
+    <h3>Heading 3 (18px, Semibold)</h3>
+    <h4>Heading 4 (15px, Semibold)</h4>
+    
+    <p>This is a paragraph using the primary text color. It has a comfortable line height (1.5) that makes long-form content easy to read. The font is system-ui with Inter as a fallback.</p>
+    
+    <p><span class="text-secondary">This is secondary text used for descriptions and less important information.</span></p>
+    
+    <p><span class="text-tertiary">This is tertiary text for hints and very subtle information.</span></p>
+    
+    <p><code>const message = "Code is styled with monospace font"</code></p>
+  </section>
+
+  <!-- LOADING STATES -->
+  <section class="showcase-section">
+    <h2>Loading States</h2>
+    
+    <h3>Skeleton Loaders</h3>
+    <div class="showcase-grid" style="grid-template-columns: 1fr;">
+      <div>
+        <div class="skeleton skeleton-line" style="width: 80%;"></div>
+        <div class="skeleton skeleton-line" style="width: 100%;"></div>
+        <div class="skeleton skeleton-line" style="width: 90%;"></div>
+      </div>
+    </div>
+
+    <h3 style="margin-top: var(--space-6);">Animated Spinners</h3>
+    <div class="showcase-grid">
+      <div class="showcase-item">
+        <div style="font-size: 32px;" class="animate-spin">LOADING</div>
+      </div>
+      <div class="showcase-item">
+        <div class="skeleton" style="width: 40px; height: 40px; border-radius: var(--radius-full);"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- EMPTY STATES -->
+  <section class="showcase-section">
+    <h2>Empty States</h2>
+    
+    <div class="empty-state">
+      <div class="empty-state-icon">EMPTY</div>
+      <h3 class="empty-state-title">No Projects Yet</h3>
+      <p class="empty-state-message">
+        Get started by creating your first food donation campaign or importing existing projects.
+      </p>
+      <button class="btn btn-primary">Create Project</button>
+    </div>
+  </section>
+
+  <!-- UTILITY EXAMPLES -->
+  <section class="showcase-section">
+    <h2>Utilities & Spacing</h2>
+    
+    <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: var(--space-4);">
+      <div>
+        <h4>Flexbox Utilities</h4>
+        <div class="flex gap-2 mt-3" style="background: var(--color-bg-hover); padding: var(--space-3); border-radius: var(--radius-md);">
+          <div class="badge">flex</div>
+          <div class="badge">gap-2</div>
+        </div>
+        
+        <div class="flex-between mt-3" style="background: var(--color-bg-hover); padding: var(--space-3); border-radius: var(--radius-md);">
+          <span>Left item</span>
+          <span>Right item</span>
+        </div>
+        
+        <div class="flex-center mt-3" style="background: var(--color-bg-hover); padding: var(--space-3); border-radius: var(--radius-md); height: 60px;">
+          <span>Centered</span>
+        </div>
+      </div>
+      
+      <div>
+        <h4>Text Utilities</h4>
+        <div class="text-center mt-3" style="background: var(--color-bg-hover); padding: var(--space-3); border-radius: var(--radius-md);">
+          Centered text
+        </div>
+        
+        <div class="truncate mt-3" style="background: var(--color-bg-hover); padding: var(--space-3); border-radius: var(--radius-md);">
+          This text is truncated if it overflows the container and will show ellipsis
+        </div>
+        
+        <div class="line-clamp-2 mt-3" style="background: var(--color-bg-hover); padding: var(--space-3); border-radius: var(--radius-md);">
+          This text is clamped to 2 lines. Any content beyond the second line will be cut off and replaced with an ellipsis to indicate more content exists.
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- COLOR PALETTE -->
+  <section class="showcase-section">
+    <h2>Color Palette</h2>
+    
+    <div class="showcase-grid" style="grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));">
+      <div style="background: var(--color-bg-primary); border: 1px solid var(--color-border-primary); border-radius: var(--radius-md); padding: var(--space-4); text-align: center;">
+        <div style="font-size: 12px; color: var(--color-text-tertiary);">bg-primary</div>
+        <div>#0f1015</div>
+      </div>
+      <div style="background: var(--color-bg-secondary); border: 1px solid var(--color-border-primary); border-radius: var(--radius-md); padding: var(--space-4); text-align: center;">
+        <div style="font-size: 12px; color: var(--color-text-tertiary);">bg-secondary</div>
+        <div>#15171c</div>
+      </div>
+      <div style="background: var(--color-surface-default); border: 1px solid var(--color-border-primary); border-radius: var(--radius-md); padding: var(--space-4); text-align: center;">
+        <div style="font-size: 12px; color: var(--color-text-tertiary);">surface-default</div>
+        <div>#1a1c22</div>
+      </div>
+      <div style="background: var(--color-accent-primary); border: 1px solid var(--color-border-primary); border-radius: var(--radius-md); padding: var(--space-4); text-align: center; color: white;">
+        <div style="font-size: 12px; opacity: 0.9;">accent-primary</div>
+        <div>#6b7280</div>
+      </div>
+      <div style="background: var(--color-success); border: 1px solid var(--color-border-primary); border-radius: var(--radius-md); padding: var(--space-4); text-align: center; color: white;">
+        <div style="font-size: 12px; opacity: 0.9;">success</div>
+        <div>#10b981</div>
+      </div>
+      <div style="background: var(--color-error); border: 1px solid var(--color-border-primary); border-radius: var(--radius-md); padding: var(--space-4); text-align: center; color: white;">
+        <div style="font-size: 12px; opacity: 0.9;">error</div>
+        <div>#ef4444</div>
+      </div>
+    </div>
+  </section>
+
+  <div style="text-align: center; margin-top: var(--space-12); padding-top: var(--space-6); border-top: 1px solid var(--color-border-primary); color: var(--color-text-secondary);">
+    <p>🍽️ Save Food UI Design System • Inspired by Linear.app • Version 1.0</p>
+    <p style="font-size: var(--font-size-xs); margin-top: var(--space-3);">
+      Minimalistic, calm, premium dark UI for productivity
+    </p>
+  </div>
+</div>
+
+</body>
+</html>
