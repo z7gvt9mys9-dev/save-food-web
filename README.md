@@ -36,28 +36,6 @@
 - Яндекс.Карты API (геокодирование + маршруты)  
 - JWT авторизация  
 
-## Структура проекта
-save-food-web/
-├── backend/              # FastAPI бэкенд
-│   ├── app/              # основная логика
-│   ├── database.py
-│   ├── main.py
-│   └── requirements.txt
-├── project/              # React фронтенд
-│   ├── src/
-│   │   ├── components/
-│   │   ├── pages/
-│   │   ├── api/
-│   │   ├── context/
-│   │   └── App.jsx
-│   ├── public/
-│   └── vite.config.js
-├── savefood.db           # локальная база (не коммитить!)
-├── .gitignore
-└── README.md
-
-
-
 ## Установка и запуск
 
 ### 1. Backend
