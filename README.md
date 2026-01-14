@@ -46,15 +46,16 @@ python -m venv venv
 source venv/bin/activate   # Windows: venv\Scripts\activate
 pip install -r requirements.txt
 uvicorn main:app --reload
-
+```
 API будет доступен на: http://localhost:8000
 Swagger-документация: http://localhost:8000/docs
 
 ## 2. Frontend
+```
 cd project
 npm install
 npm run dev
-
+```
 Открывается на: http://localhost:5173 (или другой порт Vite)
 3. База данных
 Проект использует SQLite (savefood.db).
