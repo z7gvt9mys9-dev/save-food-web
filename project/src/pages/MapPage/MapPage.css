@@ -971,6 +971,77 @@
 }
 
 /* Route Info Panel */
+.delivery-info-panel {
+  position: absolute;
+  top: 80px;
+  right: 20px;
+  background: rgba(11, 12, 13, 0.95);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  padding: 16px;
+  max-width: 300px;
+  backdrop-filter: blur(10px);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+  z-index: 100;
+}
+
+.delivery-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 12px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.delivery-header h3 {
+  margin: 0;
+  font-size: 1rem;
+  color: #e6e7eb;
+}
+
+.delivery-header svg {
+  color: #10b981;
+  flex-shrink: 0;
+}
+
+.delivery-details {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.delivery-detail {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 0.9rem;
+}
+
+.delivery-detail svg {
+  color: #6b7280;
+  flex-shrink: 0;
+}
+
+.delivery-detail .label {
+  color: #8a8f98;
+  font-size: 0.85rem;
+  min-width: 120px;
+}
+
+.delivery-detail .value {
+  color: #e6e7eb;
+  font-weight: 600;
+}
+
+.arrival-warning {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.85rem;
+  font-weight: 500;
+}
+
 .route-info-panel {
   position: absolute;
   bottom: 80px;

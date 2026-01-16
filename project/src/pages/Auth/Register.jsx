@@ -17,6 +17,14 @@ const Register = () => {
 
   const handleChange = (e) => {
     const { name, value } = e.target;
+    
+    if (name === 'name') {
+      const validNamePattern = /^[а-яА-ЯёЁa-zA-Z\s]*$/;
+      if (!validNamePattern.test(value)) {
+        return;
+      }
+    }
+    
     setFormData(prev => ({ ...prev, [name]: value }));
   };
 
@@ -24,6 +32,11 @@ const Register = () => {
     e.preventDefault();
     if (!formData.name || !formData.email || !formData.password) {
       setError('Заполните все поля');
+      return;
+    }
+    const validNamePattern = /^[а-яА-ЯёЁa-zA-Z\s]+$/;
+    if (!validNamePattern.test(formData.name)) {
+      setError('Имя может содержать только буквы и пробелы');
       return;
     }
     if (formData.password !== formData.confirmPassword) {
@@ -42,7 +55,7 @@ const Register = () => {
   return (
     <div className="auth-container">
       <div className="auth-card">
-        <h1>Save Food</h1>
+        <h1>Спасаем еду</h1>
         <h2>Регистрация</h2>
         <form onSubmit={handleSubmit}>
           <div className="form-group">
@@ -52,7 +65,7 @@ const Register = () => {
               name="name"
               value={formData.name}
               onChange={handleChange}
-              placeholder="Ваше имя"
+              placeholder="Только буквы и пробелы"
             />
           </div>
           <div className="form-group">

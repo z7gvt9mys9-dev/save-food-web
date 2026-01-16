@@ -1,5 +1,3 @@
-// src/context/AuthContext.jsx
-
 import React, { createContext, useState, useContext, useEffect } from 'react';
 import { authAPI, usersAPI, notificationsAPI, setAuth } from '../services/api';
 
@@ -9,10 +7,10 @@ export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [notifications, setNotifications] = useState([]);
+  const [toasts, setToasts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [isInitializing, setIsInitializing] = useState(true);
 
-  // Initialize auth state on mount
   useEffect(() => {
     let isMounted = true;
 
@@ -21,28 +19,46 @@ export const AuthProvider = ({ children }) => {
         const token = localStorage.getItem('authToken');
         if (token) {
           try {
-            const userData = await authAPI.verify();
+            const timeoutPromise = new Promise((_, reject) =>
+              setTimeout(() => reject(new Error('Verification timeout')), 5000)
+            );
+            
+            const userData = await Promise.race([
+              authAPI.verify(),
+              timeoutPromise
+            ]);
+            
             if (isMounted) {
               setUser(userData.user);
               setIsAuthenticated(true);
-              
-              // Fetch notifications
-              const notifs = await notificationsAPI.getAll();
-              if (isMounted) {
-                setNotifications(notifs);
+              try {
+                const notifs = await Promise.race([
+                  notificationsAPI.getAll(),
+                  new Promise((_, reject) =>
+                    setTimeout(() => reject(new Error('Timeout')), 3000)
+                  )
+                ]);
+                if (isMounted) {
+                  setNotifications(notifs);
+                }
+              } catch (notifError) {
+                console.error('Notifications error:', notifError);
+                if (isMounted) {
+                  setNotifications([]);
+                }
               }
             }
           } catch (error) {
-            // Only logout on explicit 401 from backend
-            if (error.message && error.message.includes('401')) {
-              if (isMounted) {
-                localStorage.removeItem('authToken');
-                setIsAuthenticated(false);
-              }
+            if (isMounted) {
+              localStorage.removeItem('authToken');
+              setIsAuthenticated(false);
+              setUser(null);
             }
-            // Other errors: keep auth state, let user try again
+            console.error('Auth verification error:', error);
           }
         }
+      } catch (error) {
+        console.error(error);
       } finally {
         if (isMounted) {
           setLoading(false);
@@ -76,8 +92,6 @@ export const AuthProvider = ({ children }) => {
       setAuth(result.token);
       setUser(result.user);
       setIsAuthenticated(true);
-      
-      // Fetch notifications after login
       const notifs = await notificationsAPI.getAll();
       setNotifications(notifs);
       
@@ -111,7 +125,6 @@ export const AuthProvider = ({ children }) => {
 
   const addNotification = async (messageOrData, message, type) => {
     try {
-      // Handle both string message and object data
       let notifData;
       if (typeof messageOrData === 'string') {
         notifData = {
@@ -124,7 +137,6 @@ export const AuthProvider = ({ children }) => {
       }
       
       const newNotif = await notificationsAPI.create(notifData);
-      // Ensure notification has all fields needed
       const notifWithDefaults = {
         id: newNotif.id || Math.random(),
         title: newNotif.title || 'Уведомление',
@@ -162,12 +174,29 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
+  const showToast = (message, type = 'info', duration = 3000) => {
+    const id = Math.random().toString(36).substr(2, 9);
+    const newToast = { id, message, type };
+    setToasts(prev => [...prev, newToast]);
+    
+    if (duration > 0) {
+      setTimeout(() => {
+        removeToast(id);
+      }, duration);
+    }
+  };
+
+  const removeToast = (id) => {
+    setToasts(prev => prev.filter(t => t.id !== id));
+  };
+
   return (
     <AuthContext.Provider
       value={{
         user,
         isAuthenticated,
         notifications,
+        toasts,
         loading,
         isInitializing,
         register,
@@ -176,7 +205,9 @@ export const AuthProvider = ({ children }) => {
         updateUser,
         addNotification,
         clearNotification,
-        markNotificationAsRead
+        markNotificationAsRead,
+        showToast,
+        removeToast
       }}
     >
       {children}

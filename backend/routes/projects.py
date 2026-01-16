@@ -5,7 +5,7 @@ from sqlalchemy.orm import Session
 from typing import List, Optional
 import crud
 from models import (
-    ProjectCreate, ProjectUpdate, ProjectResponse, ProjectDetailResponse,
+    ProjectDB, ProjectCreate, ProjectUpdate, ProjectResponse, ProjectDetailResponse,
     DonationCreate, DonationResponse, DonationPublicResponse,
     CommentCreate, CommentResponse, CommentDetailResponse,
     SubscriptionCreate, SubscriptionResponse
@@ -16,20 +16,38 @@ from routes.auth import get_current_user
 router = APIRouter(prefix="/api/projects", tags=["projects"])
 
 
-# ============ PROJECT ENDPOINTS ============
-
 @router.get("", response_model=List[ProjectResponse])
-async def get_projects(skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
-    """Get all projects (public listing)"""
-    projects = crud.get_all_projects(db, skip=skip, limit=limit)
-    return [ProjectResponse.from_orm(p) for p in projects]
+async def get_projects(skip: int = 0, limit: int = 100, userId: int = None, db: Session = Depends(get_db)):
+    """Get all projects (public listing) or filter by userId"""
+    try:
+        if userId:
+            # Get projects by specific user
+            projects = db.query(ProjectDB).filter(ProjectDB.owner_id == userId).offset(skip).limit(limit).all()
+        else:
+            # Get all projects
+            projects = db.query(ProjectDB).offset(skip).limit(limit).all()
+        
+        return [ProjectResponse.from_orm(p) for p in projects]
+    except Exception as e:
+        print(f"Error fetching projects: {str(e)}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to fetch projects: {str(e)}"
+        )
 
 
 @router.get("/verified", response_model=List[ProjectResponse])
 async def get_verified_projects(skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
     """Get verified projects only"""
-    projects = crud.get_verified_projects(db, skip=skip, limit=limit)
-    return [ProjectResponse.from_orm(p) for p in projects]
+    try:
+        projects = db.query(ProjectDB).filter(ProjectDB.is_verified == True).offset(skip).limit(limit).all()
+        return [ProjectResponse.from_orm(p) for p in projects]
+    except Exception as e:
+        print(f"Error fetching verified projects: {str(e)}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to fetch verified projects: {str(e)}"
+        )
 
 
 @router.post("", response_model=ProjectResponse)
@@ -39,35 +57,51 @@ async def create_project(
     db: Session = Depends(get_db)
 ):
     """Create a new charity project"""
-    db_project = crud.create_project(
-        db,
-        owner_id=current_user.id,
-        name=project_data.name,
-        description=project_data.description or "",
-        icon=project_data.icon or "📦",
-        color=project_data.color or "#6b7280",
-        goal_amount=project_data.goal_amount,
-        latitude=project_data.latitude,
-        longitude=project_data.longitude
-    )
-    return ProjectResponse.from_orm(db_project)
+    try:
+        db_project = crud.create_project(
+            db,
+            owner_id=current_user.id,
+            name=project_data.name,
+            description=project_data.description or "",
+            icon=project_data.icon or "box",
+            color=project_data.color or "#6b7280",
+            goal_amount=project_data.goal_amount,
+            latitude=project_data.latitude,
+            longitude=project_data.longitude
+        )
+        return ProjectResponse.from_orm(db_project)
+    except Exception as e:
+        print(f"Error creating project: {str(e)}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to create project: {str(e)}"
+        )
 
 
 @router.get("/{project_id}", response_model=ProjectDetailResponse)
 async def get_project_detail(project_id: int, db: Session = Depends(get_db)):
     """Get project details with all information"""
-    project = crud.get_project_by_id(db, project_id)
-    
-    if not project:
+    try:
+        project = crud.get_project_by_id(db, project_id)
+        
+        if not project:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Project not found"
+            )
+        
+        response = ProjectDetailResponse.from_orm(project)
+        response.issues_count = len(project.issues)
+        response.donations_count = len(project.donations)
+        return response
+    except HTTPException:
+        raise
+    except Exception as e:
+        print(f"Error getting project detail: {str(e)}")
         raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Project not found"
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to fetch project details: {str(e)}"
         )
-    
-    response = ProjectDetailResponse.from_orm(project)
-    response.issues_count = len(project.issues)
-    response.donations_count = len(project.donations)
-    return response
 
 
 @router.put("/{project_id}", response_model=ProjectResponse)
@@ -167,8 +201,6 @@ async def upload_report_url(
     }
 
 
-# ============ DONATION ENDPOINTS (TRANSPARENT CHARITY) ============
-
 @router.post("/{project_id}/donations", response_model=DonationResponse)
 async def donate_to_project(
     project_id: int,
@@ -242,8 +274,6 @@ async def get_donation_summary(project_id: int, db: Session = Depends(get_db)):
     }
 
 
-# ============ COMMENT ENDPOINTS ============
-
 @router.post("/{project_id}/comments", response_model=CommentResponse)
 async def create_comment(
     project_id: int,
@@ -312,7 +342,52 @@ async def delete_comment(
     return {"message": "Comment deleted"}
 
 
-# ============ SUBSCRIPTION ENDPOINTS ============
+
+
+@router.get("/nearby/all", response_model=List[ProjectResponse])
+async def get_nearby_projects(
+    latitude: float = 55.7536,
+    longitude: float = 37.6201,
+    radius_km: float = 50,
+    skip: int = 0,
+    limit: int = 100,
+    db: Session = Depends(get_db)
+):
+    """Get projects within specified radius (in kilometers) from coordinates"""
+    try:
+        # Get all projects with coordinates
+        projects = db.query(ProjectDB).filter(
+            ProjectDB.latitude.isnot(None),
+            ProjectDB.longitude.isnot(None)
+        ).offset(skip).limit(limit).all()
+        
+        # Filter by distance (simple distance calculation)
+        # Using Haversine formula approximation for distance filtering
+        def haversine_distance(lat1: float, lon1: float, lat2: float, lon2: float) -> float:
+            """Calculate distance in km between two coordinates"""
+            from math import radians, sin, cos, sqrt, atan2
+            R = 6371  # Earth's radius in kilometers
+            
+            lat1, lon1, lat2, lon2 = map(radians, [lat1, lon1, lat2, lon2])
+            dlat = lat2 - lat1
+            dlon = lon2 - lon1
+            a = sin(dlat/2)**2 + cos(lat1) * cos(lat2) * sin(dlon/2)**2
+            c = 2 * atan2(sqrt(a), sqrt(1-a))
+            return R * c
+        
+        nearby = [
+            p for p in projects 
+            if haversine_distance(latitude, longitude, p.latitude, p.longitude) <= radius_km
+        ]
+        
+        return [ProjectResponse.from_orm(p) for p in nearby]
+    except Exception as e:
+        print(f"Error getting nearby projects: {str(e)}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to fetch nearby projects: {str(e)}"
+        )
+
 
 @router.post("/{project_id}/subscribe", response_model=SubscriptionResponse)
 async def subscribe_to_project(

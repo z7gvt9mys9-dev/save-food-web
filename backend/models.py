@@ -1,19 +1,14 @@
-"""SQLAlchemy ORM models and Pydantic schemas for the Save Food API"""
-
 from sqlalchemy import Column, Integer, String, Boolean, Float, DateTime, ForeignKey, Enum, Text
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
-from pydantic import BaseModel, EmailStr
+from pydantic import BaseModel, EmailStr, ConfigDict
 from typing import Optional, List
 from datetime import datetime
 from enum import Enum as PyEnum
 from database import Base
 
 
-# ============ ENUM DEFINITIONS ============
-
 class UserRole(str, PyEnum):
-    """User role enum"""
     DONOR = "Donor"
     RECIPIENT = "Recipient"
     COURIER = "Courier"
@@ -21,7 +16,6 @@ class UserRole(str, PyEnum):
 
 
 class ProjectStatus(str, PyEnum):
-    """Project status enum"""
     ACTIVE = "Active"
     IN_PROGRESS = "In_Progress"
     COMPLETED = "Completed"
@@ -35,10 +29,7 @@ class IssueCategory(str, PyEnum):
     ITEMS = "Items"
 
 
-# ============ SQLALCHEMY ORM MODELS ============
-
 class UserDB(Base):
-    """User database model"""
     __tablename__ = "users"
 
     id = Column(Integer, primary_key=True, index=True)
@@ -54,6 +45,11 @@ class UserDB(Base):
     is_admin = Column(Boolean, default=False)
     is_banned = Column(Boolean, default=False)
     
+    # Courier stats
+    courier_deliveries = Column(Integer, default=0)
+    courier_rating = Column(Float, default=5.0)
+    courier_avg_delivery_time = Column(Float, default=0.0)
+    
     # Timestamps
     created_at = Column(DateTime, server_default=func.now())
     updated_at = Column(DateTime, server_default=func.now(), onupdate=func.now())
@@ -65,6 +61,7 @@ class UserDB(Base):
     donations = relationship("DonationDB", back_populates="user")
     comments = relationship("CommentDB", back_populates="user")
     subscriptions = relationship("SubscriptionDB", back_populates="user")
+    deliveries = relationship("DeliveryDB", back_populates="courier", foreign_keys="DeliveryDB.courier_id")
 
 
 class ProjectDB(Base):
@@ -74,7 +71,7 @@ class ProjectDB(Base):
     id = Column(Integer, primary_key=True, index=True)
     name = Column(String, nullable=False)
     description = Column(Text, nullable=True)
-    icon = Column(String, default="📦")
+    icon = Column(String, default="box")
     color = Column(String, default="#6b7280")
     
     # Finance tracking
@@ -194,9 +191,29 @@ class SubscriptionDB(Base):
     project = relationship("ProjectDB", back_populates="subscriptions")
 
 
-# ============ PYDANTIC SCHEMAS ============
+class DeliveryDB(Base):
+    """Courier delivery orders"""
+    __tablename__ = "deliveries"
 
-# User Schemas
+    id = Column(Integer, primary_key=True, index=True)
+    project_id = Column(Integer, ForeignKey("projects.id"), nullable=False)
+    courier_id = Column(Integer, ForeignKey("users.id"), nullable=True)
+    
+    status = Column(String, default="pending")
+    rating = Column(Float, nullable=True)
+    delivery_time_minutes = Column(Integer, nullable=True)
+    
+    # Timestamps
+    created_at = Column(DateTime, server_default=func.now())
+    accepted_at = Column(DateTime, nullable=True)
+    completed_at = Column(DateTime, nullable=True)
+
+    # Relationships
+    project = relationship("ProjectDB")
+    courier = relationship("UserDB", back_populates="deliveries", foreign_keys=[courier_id])
+
+
+
 class UserBase(BaseModel):
     name: str
     email: str
@@ -217,6 +234,9 @@ class UserResponse(BaseModel):
     rating_level: str = "Bronze"
     is_admin: bool = False
     is_banned: bool = False
+    courier_deliveries: int = 0
+    courier_rating: float = 5.0
+    courier_avg_delivery_time: float = 0.0
     created_at: datetime
 
     class Config:
@@ -238,8 +258,8 @@ class LoginRequest(BaseModel):
     password: str
 
 
-# Project Schemas
-class ProjectCreate(BaseModel):
+
+class ProjectBase(BaseModel):
     name: str
     description: Optional[str] = ""
     icon: Optional[str] = ""
@@ -247,6 +267,10 @@ class ProjectCreate(BaseModel):
     goal_amount: float = 0.0
     latitude: Optional[float] = None
     longitude: Optional[float] = None
+
+
+class ProjectCreate(ProjectBase):
+    pass
 
 
 class ProjectUpdate(BaseModel):
@@ -263,22 +287,21 @@ class ProjectUpdate(BaseModel):
 class ProjectResponse(BaseModel):
     id: int
     name: str
-    description: Optional[str]
-    icon: str
-    color: str
+    description: Optional[str] = None
+    icon: str | None = None
+    color: str | None = "#4CAF50"
     goal_amount: float
     current_amount: float
     report_url: Optional[str] = None
-    status: str
-    is_verified: bool
+    status: str = "Active"
+    is_verified: bool = False
     latitude: Optional[float] = None
     longitude: Optional[float] = None
     owner_id: int
     created_at: datetime
     updated_at: datetime
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 
 class ProjectDetailResponse(ProjectResponse):
@@ -287,14 +310,18 @@ class ProjectDetailResponse(ProjectResponse):
     donations_count: Optional[int] = 0
 
 
-# Issue Schemas
-class IssueCreate(BaseModel):
+
+class IssueBase(BaseModel):
     title: str
     description: Optional[str] = ""
     project_id: int
     category: IssueCategory = IssueCategory.HANDS
     priority: Optional[str] = "medium"
     due_date: Optional[datetime] = None
+
+
+class IssueCreate(IssueBase):
+    pass
 
 
 class IssueUpdate(BaseModel):
@@ -336,7 +363,7 @@ class IssueDetailResponse(IssueResponse):
     project: ProjectResponse
 
 
-# Donation Schemas
+
 class DonationCreate(BaseModel):
     amount: float
     project_id: int
@@ -364,7 +391,7 @@ class DonationPublicResponse(BaseModel):
     created_at: datetime
 
 
-# Comment Schemas
+
 class CommentCreate(BaseModel):
     content: str
     project_id: int
@@ -386,7 +413,7 @@ class CommentDetailResponse(CommentResponse):
     user: UserResponse
 
 
-# Subscription Schemas
+
 class SubscriptionCreate(BaseModel):
     project_id: int
 
@@ -401,7 +428,31 @@ class SubscriptionResponse(BaseModel):
         from_attributes = True
 
 
-# Error & Message Responses
+class DeliveryCreate(BaseModel):
+    project_id: int
+
+
+class DeliveryResponse(BaseModel):
+    id: int
+    project_id: int
+    courier_id: Optional[int] = None
+    status: str
+    rating: Optional[float] = None
+    delivery_time_minutes: Optional[int] = None
+    created_at: datetime
+    accepted_at: Optional[datetime] = None
+    completed_at: Optional[datetime] = None
+
+    class Config:
+        from_attributes = True
+
+
+class DeliveryDetailResponse(DeliveryResponse):
+    project: ProjectResponse
+    courier: Optional[UserResponse] = None
+
+
+
 class ErrorResponse(BaseModel):
     error: str
 

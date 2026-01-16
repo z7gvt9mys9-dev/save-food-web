@@ -1,4 +1,3 @@
-// API configuration and utilities
 const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
 
 const getAuthToken = () => {
@@ -33,9 +32,8 @@ const apiCall = async (endpoint, method = 'GET', data = null) => {
   }
 
   try {
+    console.log(`${method} ${API_BASE_URL}${endpoint}`);
     const response = await fetch(`${API_BASE_URL}${endpoint}`, options);
-    
-    // Handle response
     let result;
     const contentType = response.headers.get('content-type');
     
@@ -51,22 +49,23 @@ const apiCall = async (endpoint, method = 'GET', data = null) => {
         (typeof result === 'object' && result.error) ||
         result ||
         `HTTP Error ${response.status}`;
+      console.error(`Error: ${response.status} ${errorMessage}`);
       throw new Error(errorMessage);
     }
 
+    console.log(`Success: ${method} ${endpoint}`, result);
     return result;
   } catch (error) {
-    console.error('API Error:', {
+    console.error('Network/Parse Error:', {
       endpoint,
       method,
       errorMessage: error.message,
-      errorStack: error.stack
+      url: `${API_BASE_URL}${endpoint}`
     });
     throw error;
   }
 };
 
-// Auth API
 export const authAPI = {
   register: (name, email, password, role) =>
     apiCall('/auth/register', 'POST', { name, email, password, role }),
@@ -79,7 +78,6 @@ export const authAPI = {
   }
 };
 
-// Users API
 export const usersAPI = {
   getMe: () => apiCall('/users/me', 'GET'),
   getUser: (id) => apiCall(`/users/${id}`, 'GET'),
@@ -90,7 +88,6 @@ export const usersAPI = {
     apiCall('/users/me', 'PUT', data)  // Use /me endpoint for current user
 };
 
-// Projects API
 export const projectsAPI = {
   getAll: () => apiCall('/projects', 'GET'),
   getById: (id) => apiCall(`/projects/${id}`, 'GET'),
@@ -99,7 +96,6 @@ export const projectsAPI = {
   delete: (id) => apiCall(`/projects/${id}`, 'DELETE')
 };
 
-// Issues API
 export const issuesAPI = {
   getByProject: (projectId) =>
     apiCall(`/issues/project/${projectId}`, 'GET'),
@@ -111,7 +107,6 @@ export const issuesAPI = {
   delete: (id) => apiCall(`/issues/${id}`, 'DELETE')
 };
 
-// Notifications API
 export const notificationsAPI = {
   getAll: () => apiCall('/notifications', 'GET'),
   create: (data) => apiCall('/notifications', 'POST', data),
@@ -120,16 +115,22 @@ export const notificationsAPI = {
   delete: (id) => apiCall(`/notifications/${id}`, 'DELETE')
 };
 
-// Donations/Products API
 export const donationsAPI = {
-  getAvailable: () => apiCall('/projects', 'GET'), // Get all active projects as available products
+  getAvailable: () => apiCall('/projects', 'GET'),
   getByProject: (projectId) =>
     apiCall(`/projects/${projectId}`, 'GET'),
   create: (projectId, data) =>
     apiCall(`/projects/${projectId}/donations`, 'POST', data)
 };
 
-// Admin API
+export const deliveriesAPI = {
+  getAll: () => apiCall('/deliveries', 'GET'),
+  accept: (deliveryId) =>
+    apiCall('/deliveries/accept', 'POST', { delivery_id: deliveryId }),
+  complete: (deliveryId, deliveryTimeMinutes, rating) =>
+    apiCall('/deliveries/complete', 'POST', { delivery_id: deliveryId, delivery_time_minutes: deliveryTimeMinutes, rating })
+};
+
 export const adminAPI = {
   getAdmins: () => apiCall('/admin/admins', 'GET'),
   makeAdmin: (userId) =>
@@ -146,14 +147,13 @@ export const adminAPI = {
     apiCall('/admin/users/banned/list', 'GET')
 };
 
-// Routing API
 export const routingAPI = {
   health: () => apiCall('/routes/health', 'GET'),
   getRoute: (locations) => {
-    console.log('[routingAPI] Requesting route for locations:', locations);
+    console.log('Requesting route for locations:', locations);
     return apiCall('/routes/route', 'POST', { locations, costing: 'auto' })
       .then(response => {
-        console.log('[routingAPI] Route response:', response);
+        console.log('Route response:', response);
         return response;
       })
       .catch(error => {
@@ -167,7 +167,6 @@ export const routingAPI = {
     apiCall(`/routes/optimize?num_couriers=${numCouriers}`, 'POST', { locations, costing: 'auto' })
 };
 
-// Helper to set auth token after login
 export const setAuth = (token) => {
   setAuthToken(token);
 };

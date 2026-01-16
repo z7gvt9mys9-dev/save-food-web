@@ -13,13 +13,11 @@ const AdminPanel = () => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Check if user is authenticated and is admin
     if (!isAuthenticated) {
       navigate('/login');
       return;
     }
 
-    // Check if user is admin
     if (!user?.is_admin) {
       navigate('/dashboard');
       return;

@@ -11,8 +11,6 @@ logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/api/routes", tags=["routes"])
 
-# Startup/shutdown events are now handled in main.py to avoid duplicate events
-
 @router.get("/health")
 async def check_routing_health():
     """Check if routing service is available"""
@@ -142,8 +140,6 @@ async def optimize_delivery_routes(
         
         logger.info(f"Optimizing {len(locations)} locations for {num_couriers} courier(s)")
         
-        # For now, calculate distance matrix and basic route
-        # Full VROOM integration would be more complex
         route = await routing_service.get_route(locations)
         
         if not route:
@@ -152,7 +148,6 @@ async def optimize_delivery_routes(
                 detail="Could not optimize routes"
             )
         
-        # Simple split: divide waypoints among couriers
         waypoints_per_courier = len(route.waypoints) // num_couriers
         routes = []
         

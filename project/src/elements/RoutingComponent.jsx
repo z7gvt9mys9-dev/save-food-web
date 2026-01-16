@@ -8,13 +8,11 @@ import Register from '../pages/Auth/Register';
 import Dashboard from '../pages/Dashboard/Dashboard';
 import Profile from '../pages/Profile/Profile';
 import MapPage from '../pages/MapPage/MapPage';
-import Projects from '../pages/Projects/Projects';
 import AdminPanel from '../pages/AdminPanel/AdminPanel';
 
 const RoutingComponent = () => {
-  const { isAuthenticated, loading, isInitializing } = useAuth();
+  const { isAuthenticated, loading, isInitializing, user } = useAuth();
 
-  // During initialization, show loading screen
   if (loading || isInitializing) {
     return (
       <div style={{
@@ -57,8 +55,7 @@ const RoutingComponent = () => {
           <Route path="/register" element={!isAuthenticated ? <Register /> : <Navigate to="/dashboard" replace />} />
           <Route path="/dashboard" element={isAuthenticated ? <Dashboard /> : <Navigate to="/login" replace />} />
           <Route path="/profile" element={isAuthenticated ? <Profile /> : <Navigate to="/login" replace />} />
-          <Route path="/projects" element={isAuthenticated ? <Projects /> : <Navigate to="/login" replace />} />
-          <Route path="/map" element={isAuthenticated ? <MapPage /> : <Navigate to="/login" replace />} />
+          <Route path="/map" element={isAuthenticated && user?.role !== 'Recipient' ? <MapPage /> : <Navigate to="/dashboard" replace />} />
           <Route path="/admin" element={isAuthenticated ? <AdminPanel /> : <Navigate to="/login" replace />} />
           <Route path="/" element={isAuthenticated ? <Navigate to="/dashboard" replace /> : <Navigate to="/login" replace />} />
         </Routes>

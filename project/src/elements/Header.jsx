@@ -29,9 +29,7 @@ const Header = () => {
 
   const isValidEmoji = (avatar) => {
     if (!avatar) return false;
-    // Check if it's a URL
     if (avatar.includes('http') || avatar.includes('://')) return false;
-    // Check if it's not just a placeholder
     if (avatar === '' || avatar === null) return false;
     return avatar && avatar.length > 0 && !avatar.includes('/');
   };
@@ -56,7 +54,7 @@ const Header = () => {
         </div>
 
         <div className="header-center">
-          <h1>Save Food</h1>
+          <h1>Спасаем еду</h1>
         </div>
 
         <div className="header-right">
@@ -65,8 +63,8 @@ const Header = () => {
               <button 
                 className="admin-btn" 
                 onClick={() => setShowAdminMenu(!showAdminMenu)}
-                title="Admin Menu"
-                aria-label="Admin Menu"
+                title="Меню администратора"
+                aria-label="Меню администратора"
               >
                 <Shield size={20} />
               </button>

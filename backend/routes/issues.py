@@ -14,8 +14,6 @@ from routes.auth import get_current_user
 router = APIRouter(prefix="/api/issues", tags=["issues"])
 
 
-# ============ ISSUE ENDPOINTS ============
-
 @router.get("", response_model=List[IssueResponse])
 async def get_issues(
     project_id: Optional[int] = None,
@@ -112,8 +110,6 @@ async def update_issue(
     
     return IssueResponse.from_orm(updated_issue)
 
-
-# ============ VOLUNTEER ASSIGNMENT (GAMIFICATION) ============
 
 @router.post("/{issue_id}/assign", response_model=IssueResponse)
 async def assign_volunteer(

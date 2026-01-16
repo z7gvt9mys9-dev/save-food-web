@@ -21,9 +21,7 @@ const Profile = () => {
 
   const isValidEmojiForAvatar = (text) => {
     if (!text) return false;
-    // Check if it's a URL or data URI
     if (text.includes('http') || text.includes('://') || text.startsWith('data:')) return false;
-    // Check if it looks like actual emoji (not text like "SALAD")
     const emojiRegex = /^[\p{Emoji_Presentation}\p{Extended_Pictographic}]+$/u;
     return emojiRegex.test(text);
   };
@@ -77,7 +75,6 @@ const Profile = () => {
 
   const isValidEmoji = (avatar) => {
     if (!avatar) return false;
-    // Check if it's a URL
     if (avatar.includes('http') || avatar.includes('://')) return false;
     if (avatar === '' || avatar === null) return false;
     return avatar && avatar.length > 0 && !avatar.includes('/');

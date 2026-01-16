@@ -3,7 +3,7 @@
 from sqlalchemy.orm import Session
 from sqlalchemy import and_
 from models import (
-    UserDB, ProjectDB, IssueDB, DonationDB, CommentDB, SubscriptionDB,
+    UserDB, ProjectDB, IssueDB, DonationDB, CommentDB, SubscriptionDB, DeliveryDB,
     ProjectStatus, IssueCategory, UserRole
 )
 from auth import hash_password, verify_password
@@ -409,3 +409,67 @@ def get_project_subscribers(db: Session, project_id: int) -> List[UserDB]:
         SubscriptionDB.project_id == project_id
     ).all()
     return [sub.user for sub in subscriptions]
+
+
+def create_delivery(db: Session, project_id: int) -> DeliveryDB:
+    """Create a new delivery order"""
+    db_delivery = DeliveryDB(
+        project_id=project_id,
+        status="pending"
+    )
+    db.add(db_delivery)
+    db.commit()
+    db.refresh(db_delivery)
+    return db_delivery
+
+
+def accept_delivery(db: Session, delivery_id: int, courier_id: int) -> Optional[DeliveryDB]:
+    """Accept delivery order"""
+    from datetime import datetime
+    db_delivery = db.query(DeliveryDB).filter(DeliveryDB.id == delivery_id).first()
+    
+    if db_delivery:
+        db_delivery.courier_id = courier_id
+        db_delivery.status = "accepted"
+        db_delivery.accepted_at = datetime.utcnow()
+        db.commit()
+        db.refresh(db_delivery)
+    
+    return db_delivery
+
+
+def complete_delivery(db: Session, delivery_id: int, delivery_time_minutes: int, rating: float) -> Optional[DeliveryDB]:
+    """Complete delivery and update courier stats"""
+    from datetime import datetime
+    db_delivery = db.query(DeliveryDB).filter(DeliveryDB.id == delivery_id).first()
+    
+    if db_delivery and db_delivery.courier_id:
+        db_delivery.status = "completed"
+        db_delivery.delivery_time_minutes = delivery_time_minutes
+        db_delivery.rating = rating
+        db_delivery.completed_at = datetime.utcnow()
+        
+        courier = get_user_by_id(db, db_delivery.courier_id)
+        if courier:
+            old_deliveries = courier.courier_deliveries
+            old_rating = courier.courier_rating
+            old_time = courier.courier_avg_delivery_time
+            
+            courier.courier_deliveries += 1
+            courier.courier_rating = (old_rating * old_deliveries + rating) / courier.courier_deliveries
+            courier.courier_avg_delivery_time = (old_time * old_deliveries + delivery_time_minutes) / courier.courier_deliveries
+        
+        db.commit()
+        db.refresh(db_delivery)
+    
+    return db_delivery
+
+
+def get_all_pending_deliveries(db: Session) -> List[DeliveryDB]:
+    """Get all pending delivery orders"""
+    return db.query(DeliveryDB).filter(DeliveryDB.status == "pending").all()
+
+
+def get_delivery_by_id(db: Session, delivery_id: int) -> Optional[DeliveryDB]:
+    """Get delivery by ID"""
+    return db.query(DeliveryDB).filter(DeliveryDB.id == delivery_id).first()

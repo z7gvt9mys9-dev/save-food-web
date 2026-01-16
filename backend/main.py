@@ -3,25 +3,22 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 import sys
 import os
+from datetime import datetime
 
-# Ensure backend directory is in path
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
-from database import init_db, settings
-
-# Import routers
-from routes import auth, users, projects, issues, notifications, adminpanel, routing
+from database import init_db, settings, SessionLocal
+from models import UserDB
+from routes import auth, users, projects, issues, notifications, adminpanel, routing, donations, deliveries
 from middleware.ban_middleware import BanCheckMiddleware
 from services.routing_service import routing_service
-
-# Initialize FastAPI app
+import bcrypt
 app = FastAPI(
     title="Save Food API",
     description="Food charity distribution management system with transparency",
     version="2.0.0"
 )
 
-# Add middlewares (Ban check before CORS)
 app.add_middleware(BanCheckMiddleware)
 app.add_middleware(
     CORSMiddleware,
@@ -37,35 +34,79 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+def hash_password(password: str) -> str:
+    """Hash password using bcrypt"""
+    salt = bcrypt.gensalt(rounds=12)
+    return bcrypt.hashpw(password.encode('utf-8'), salt).decode('utf-8')
 
-# Initialize database on startup
+def init_preset_users():
+    """Initialize preset user accounts"""
+    try:
+        db = SessionLocal()
+        
+        preset_accounts = [
+            {
+                "email": "igel2020i@gmail.com",
+                "name": "Developer",
+                "password": "1",
+                "role": "Donor",
+                "avatar": "👨‍💻",
+                "is_admin": False
+            },
+            {
+                "email": "kurt20212022@gmail.com",
+                "name": "Admin",
+                "password": "1",
+                "role": "Administrator",
+                "avatar": "🔐",
+                "is_admin": True
+            }
+        ]
+        
+        for account in preset_accounts:
+            existing = db.query(UserDB).filter(UserDB.email == account["email"]).first()
+            if not existing:
+                new_user = UserDB(
+                    email=account["email"],
+                    name=account["name"],
+                    password_hash=hash_password(account["password"]),
+                    is_admin=account["is_admin"],
+                    role=account["role"],
+                    avatar=account["avatar"],
+                    xp=0,
+                    rating_level="Bronze",
+                    is_banned=False,
+                    created_at=datetime.utcnow(),
+                    updated_at=datetime.utcnow()
+                )
+                db.add(new_user)
+                db.commit()
+        
+        db.close()
+    except Exception as e:
+        print(f"Warning: Could not initialize preset users: {e}")
+
+
 @app.on_event("startup")
 async def startup_event():
-    """Initialize database and services on app startup"""
     init_db()
     print(f"SQLite3 database initialized (Environment: {settings.environment})")
-    
-    # Initialize routing service
+    init_preset_users()
     await routing_service.init_session()
     is_healthy = await routing_service.check_valhalla_health()
     if is_healthy:
-        print("✓ Valhalla routing service is healthy")
+        print("Valhalla routing service is healthy")
     else:
-        print("⚠ Valhalla routing service is not available (routing features will be limited)")
+        print("Valhalla routing service is not available")
 
-
-# Cleanup on shutdown
 @app.on_event("shutdown")
 async def shutdown_event():
-    """Cleanup services on app shutdown"""
     await routing_service.close_session()
     print("Routing service cleaned up")
 
 
-# Health check endpoint
 @app.get("/health")
 async def health_check():
-    """Health check endpoint"""
     return {
         "status": "ok",
         "message": "Save Food API v2.0.0 is running",
@@ -73,10 +114,8 @@ async def health_check():
         "features": ["Transparent Charity", "Gamification", "Volunteer Matching"]
     }
 
-
 @app.get("/")
 async def root():
-    """Root endpoint"""
     return {
         "message": "Welcome to Save Food API v2.0.0",
         "version": "2.0.0",
@@ -96,8 +135,6 @@ async def root():
         }
     }
 
-
-# Include routers
 app.include_router(auth.router)
 app.include_router(users.router)
 app.include_router(projects.router)
@@ -105,12 +142,12 @@ app.include_router(issues.router)
 app.include_router(notifications.router)
 app.include_router(adminpanel.router)
 app.include_router(routing.router)
+app.include_router(donations.router)
+app.include_router(deliveries.router)
 
 
-# Global exception handler
 @app.exception_handler(Exception)
 async def global_exception_handler(request, exc):
-    """Handle all exceptions"""
     return JSONResponse(
         status_code=500,
         content={"detail": str(exc)}

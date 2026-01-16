@@ -21,7 +21,6 @@ const Login = () => {
     if (result.success) {
       navigate('/dashboard');
     } else {
-      // Display specific error message for wrong credentials
       if (result.message && result.message.includes('Invalid email or password')) {
         setError('Неправильный пароль или email');
       } else {
@@ -33,7 +32,7 @@ const Login = () => {
   return (
     <div className="auth-container">
       <div className="auth-card">
-        <h1>Save Food</h1>
+        <h1>Спасаем еду</h1>
         <h2>Вход</h2>
         <form onSubmit={handleSubmit}>
           <div className="form-group">
@@ -42,7 +41,7 @@ const Login = () => {
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              placeholder="your@email.com"
+              placeholder=""
             />
           </div>
           <div className="form-group">
@@ -51,7 +50,7 @@ const Login = () => {
               type="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              placeholder="••••••••"
+              placeholder=""
             />
           </div>
           {error && <p className="error-message">{error}</p>}
@@ -62,18 +61,6 @@ const Login = () => {
         <p className="auth-footer">
           Нет аккаунта? <Link to="/register">Зарегистрируйтесь</Link>
         </p>
-        <div className="test-credentials">
-          <p><strong>Демо-аккаунты:</strong></p>
-          <p><em>Developer (полный доступ):</em></p>
-          <p>Email: developer@savefood.local</p>
-          <p>Password: Developer123!@#</p>
-          <p><em>Администратор:</em></p>
-          <p>Email: admin@savefood.local</p>
-          <p>Password: Admin123!@#</p>
-          <p><em>Пользователь:</em></p>
-          <p>Email: donor@example.com</p>
-          <p>Password: password123</p>
-        </div>
       </div>
     </div>
   );

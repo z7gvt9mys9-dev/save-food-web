@@ -6,14 +6,13 @@ import './AdminPanel.css';
 
 const AdminPanel = ({ onClose }) => {
   const { user } = useAuth();
-  const [activeTab, setActiveTab] = useState('admins'); // 'admins' or 'users'
+  const [activeTab, setActiveTab] = useState('admins');
   const [admins, setAdmins] = useState([]);
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const isDeveloper = user?.name === 'Developer';
 
-  // Fetch admins and users
   useEffect(() => {
     fetchData();
   }, [activeTab]);
@@ -45,7 +44,6 @@ const AdminPanel = ({ onClose }) => {
     }
 
     try {
-      // Call API to make user admin
       await adminAPI.makeAdmin(userId);
       alert('Пользователь назначен администратором');
       setUsers(users.map(u => u.id === userId ? { ...u, is_admin: true } : u));

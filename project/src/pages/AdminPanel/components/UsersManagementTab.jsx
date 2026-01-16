@@ -9,7 +9,7 @@ const UsersManagementTab = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
-  const [activeView, setActiveView] = useState('all'); // 'all' or 'banned'
+  const [activeView, setActiveView] = useState('all');
   const [banReason, setBanReason] = useState('');
   const [selectedUserId, setSelectedUserId] = useState(null);
   const [showBanModal, setShowBanModal] = useState(false);
@@ -23,8 +23,6 @@ const UsersManagementTab = () => {
     try {
       setLoading(true);
       setError('');
-      // In a real app, you'd have an API to get all users
-      // For now, we'll just load banned users
       const banned = await adminAPI.getBannedUsers();
       setBannedUsers(banned);
     } catch (err) {
@@ -50,7 +48,6 @@ const UsersManagementTab = () => {
       setShowBanModal(false);
       setSelectedUserId(null);
       setBanReason('');
-      // Refresh the list
       await fetchUsers();
       setError('');
     } catch (err) {
@@ -65,7 +62,6 @@ const UsersManagementTab = () => {
     try {
       setActionLoading(true);
       await adminAPI.unbanUser(userId);
-      // Refresh the list
       await fetchUsers();
       setError('');
     } catch (err) {
@@ -205,7 +201,6 @@ const UsersManagementTab = () => {
         </div>
       )}
 
-      {/* Ban Modal */}
       {showBanModal && (
         <div className="modal-overlay" onClick={() => !actionLoading && setShowBanModal(false)}>
           <div className="modal" onClick={(e) => e.stopPropagation()}>
