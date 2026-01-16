@@ -242,10 +242,6 @@ PORT=5000
 - Docker контейнеризация
 - CI/CD pipeline
 
-## Лицензия
-
-MIT License
-
 ## Контакты
 
 Repository: https://github.com/z7gvt9mys9-dev/save-food-web
