@@ -213,6 +213,28 @@ class DeliveryDB(Base):
     courier = relationship("UserDB", back_populates="deliveries", foreign_keys=[courier_id])
 
 
+class ParcelLockerDB(Base):
+    """Parcel locker storage locations"""
+    __tablename__ = "parcel_lockers"
+
+    id = Column(Integer, primary_key=True, index=True)
+    name = Column(String, nullable=False)
+    address = Column(String, nullable=False)
+    latitude = Column(Float, nullable=False)
+    longitude = Column(Float, nullable=False)
+    
+    # Capacity
+    total_capacity = Column(Integer, default=50)
+    current_occupancy = Column(Integer, default=0)
+    
+    # Status
+    is_active = Column(Boolean, default=True)
+    
+    # Timestamps
+    created_at = Column(DateTime, server_default=func.now())
+    updated_at = Column(DateTime, server_default=func.now(), onupdate=func.now())
+
+
 
 class UserBase(BaseModel):
     name: str
@@ -451,6 +473,26 @@ class DeliveryDetailResponse(DeliveryResponse):
     project: ProjectResponse
     courier: Optional[UserResponse] = None
 
+
+class ParcelLockerResponse(BaseModel):
+    id: int
+    name: str
+    address: str
+    latitude: float
+    longitude: float
+    total_capacity: int
+    current_occupancy: int
+    is_active: bool
+    available_slots: int
+    created_at: datetime
+    updated_at: datetime
+
+    class Config:
+        from_attributes = True
+    
+    @property
+    def available_slots(self) -> int:
+        return self.total_capacity - self.current_occupancy
 
 
 class ErrorResponse(BaseModel):

@@ -23,7 +23,8 @@ const Dashboard = () => {
     description: '',
     location: '',
     latitude: null,
-    longitude: null
+    longitude: null,
+    deliveryMethod: 'courier'
   });
 
   const [locationSuggestions, setLocationSuggestions] = useState([]);
@@ -376,6 +377,14 @@ const Dashboard = () => {
               Координаты: {donorForm.latitude.toFixed(4)}, {donorForm.longitude.toFixed(4)}
             </p>
           )}
+        </div>
+        <div className="form-group">
+          <label>Способ доставки</label>
+          <select name="deliveryMethod" value={donorForm.deliveryMethod} onChange={handleDonorChange}>
+            <option value="courier">Курьер - доставка добровольцем</option>
+            <option value="parcel_locker">Почтомат - получение через автомат</option>
+            <option value="both">Оба способа - выбор получателем</option>
+          </select>
         </div>
         <button type="submit" className="btn-submit">Опубликовать товар</button>
       </form>

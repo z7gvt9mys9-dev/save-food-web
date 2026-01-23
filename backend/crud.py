@@ -3,7 +3,7 @@
 from sqlalchemy.orm import Session
 from sqlalchemy import and_
 from models import (
-    UserDB, ProjectDB, IssueDB, DonationDB, CommentDB, SubscriptionDB, DeliveryDB,
+    UserDB, ProjectDB, IssueDB, DonationDB, CommentDB, SubscriptionDB, DeliveryDB, ParcelLockerDB,
     ProjectStatus, IssueCategory, UserRole
 )
 from auth import hash_password, verify_password
@@ -473,3 +473,79 @@ def get_all_pending_deliveries(db: Session) -> List[DeliveryDB]:
 def get_delivery_by_id(db: Session, delivery_id: int) -> Optional[DeliveryDB]:
     """Get delivery by ID"""
     return db.query(DeliveryDB).filter(DeliveryDB.id == delivery_id).first()
+
+
+# ============ PARCEL LOCKER CRUD ============
+
+def create_parcel_locker(db: Session, name: str, address: str, latitude: float,
+                        longitude: float, total_capacity: int = 50) -> ParcelLockerDB:
+    """Create a new parcel locker"""
+    db_locker = ParcelLockerDB(
+        name=name,
+        address=address,
+        latitude=latitude,
+        longitude=longitude,
+        total_capacity=total_capacity,
+        current_occupancy=0,
+        is_active=True
+    )
+    db.add(db_locker)
+    db.commit()
+    db.refresh(db_locker)
+    return db_locker
+
+
+def get_parcel_locker_by_id(db: Session, locker_id: int) -> Optional[ParcelLockerDB]:
+    """Get parcel locker by ID"""
+    return db.query(ParcelLockerDB).filter(ParcelLockerDB.id == locker_id).first()
+
+
+def get_all_parcel_lockers(db: Session, skip: int = 0, limit: int = 100) -> List[ParcelLockerDB]:
+    """Get all active parcel lockers"""
+    return db.query(ParcelLockerDB).filter(
+        ParcelLockerDB.is_active == True
+    ).offset(skip).limit(limit).all()
+
+
+def update_locker_occupancy(db: Session, locker_id: int, occupancy: int) -> Optional[ParcelLockerDB]:
+    """Update locker occupancy"""
+    db_locker = get_parcel_locker_by_id(db, locker_id)
+    if db_locker and 0 <= occupancy <= db_locker.total_capacity:
+        db_locker.current_occupancy = occupancy
+        db.commit()
+        db.refresh(db_locker)
+    return db_locker
+
+
+def increment_locker_occupancy(db: Session, locker_id: int) -> Optional[ParcelLockerDB]:
+    """Increment locker occupancy by 1"""
+    db_locker = get_parcel_locker_by_id(db, locker_id)
+    if db_locker and db_locker.current_occupancy < db_locker.total_capacity:
+        db_locker.current_occupancy += 1
+        db.commit()
+        db.refresh(db_locker)
+    return db_locker
+
+
+def decrement_locker_occupancy(db: Session, locker_id: int) -> Optional[ParcelLockerDB]:
+    """Decrement locker occupancy by 1"""
+    db_locker = get_parcel_locker_by_id(db, locker_id)
+    if db_locker and db_locker.current_occupancy > 0:
+        db_locker.current_occupancy -= 1
+        db.commit()
+        db.refresh(db_locker)
+    return db_locker
+
+
+def deactivate_parcel_locker(db: Session, locker_id: int, admin_id: int) -> Optional[ParcelLockerDB]:
+    """Deactivate parcel locker (admin only)"""
+    admin = get_user_by_id(db, admin_id)
+    if not admin or not admin.is_admin:
+        return None
+    
+    db_locker = get_parcel_locker_by_id(db, locker_id)
+    if db_locker:
+        db_locker.is_active = False
+        db.commit()
+        db.refresh(db_locker)
+    return db_locker

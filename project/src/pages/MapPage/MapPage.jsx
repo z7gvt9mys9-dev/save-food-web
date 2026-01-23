@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import './MapPage.css';
-import { MapPin, Package, AlertCircle, Navigation, Loader, MapIcon, AlertTriangle, Clock } from 'lucide-react';
+import { MapPin, Package, AlertCircle, Navigation, Loader, MapIcon, AlertTriangle, Clock, Box } from 'lucide-react';
 import { YMaps, Map as YandexMap, Placemark, Polyline, ZoomControl, FullscreenControl } from 'react-yandex-maps';
 import { useAllProjects } from '../../hooks/useProjects';
 import { useAuth } from '../../context/AuthContext';
@@ -27,6 +27,9 @@ const MapPage = () => {
   const [elapsedTime, setElapsedTime] = useState(0);
   const [distanceToDelivery, setDistanceToDelivery] = useState(null);
   const [geolocationWatchId, setGeolocationWatchId] = useState(null);
+  const [selectedParcelLocker, setSelectedParcelLocker] = useState(null);
+  const [parcelLockers, setParcelLockers] = useState([]);
+  const [lockersLoading, setLockersLoading] = useState(false);
 
   useEffect(() => {
     let isMounted = true;
@@ -145,6 +148,25 @@ const MapPage = () => {
         navigator.geolocation.clearWatch(geolocationWatchId);
       }
     };
+  }, []);
+
+  useEffect(() => {
+    const fetchParcelLockers = async () => {
+      setLockersLoading(true);
+      try {
+        const response = await fetch('http://localhost:8000/api/parcel-lockers');
+        if (response.ok) {
+          const data = await response.json();
+          setParcelLockers(data);
+        }
+      } catch (error) {
+        console.error('Error fetching parcel lockers:', error);
+      } finally {
+        setLockersLoading(false);
+      }
+    };
+
+    fetchParcelLockers();
   }, []);
 
   useEffect(() => {
@@ -396,6 +418,27 @@ const MapPage = () => {
             />
           ))}
 
+          {parcelLockers.map((locker) => (
+            <Placemark
+              key={`locker-${locker.id}`}
+              geometry={[locker.latitude, locker.longitude]}
+              onClick={() => {
+                setSelectedParcelLocker(locker);
+                setMapState({
+                  center: [locker.latitude, locker.longitude],
+                  zoom: 15
+                });
+              }}
+              options={{ 
+                preset: 'islands#yellowIcon',
+                iconColor: selectedParcelLocker?.id === locker.id ? '#FF6B35' : '#FFB81C'
+              }}
+              properties={{
+                balloonContent: `<div><strong>${locker.name}</strong><br/><small>${locker.address}</small><br/><small>Свободно: ${locker.total_capacity - locker.current_occupancy}/${locker.total_capacity}</small></div>`
+              }}
+            />
+          ))}
+
           {acceptedDelivery && (
             <Placemark
               geometry={[acceptedDelivery.latitude, acceptedDelivery.longitude]}
@@ -464,6 +507,34 @@ const MapPage = () => {
               Вычисление маршрута...
             </div>
           )}
+        </div>
+      )}
+
+      {selectedParcelLocker && (
+        <div className="parcel-locker-panel">
+          <div className="panel-header">
+            <Box size={20} />
+            <h3>{selectedParcelLocker.name}</h3>
+          </div>
+          <div className="panel-content">
+            <div className="info-row">
+              <MapPin size={16} />
+              <span>{selectedParcelLocker.address}</span>
+            </div>
+            <div className="info-row">
+              <Package size={16} />
+              <span>Свободно ячеек: {selectedParcelLocker.total_capacity - selectedParcelLocker.current_occupancy}/{selectedParcelLocker.total_capacity}</span>
+            </div>
+            <div className="capacity-bar">
+              <div className="capacity-fill" style={{ width: `${((selectedParcelLocker.total_capacity - selectedParcelLocker.current_occupancy) / selectedParcelLocker.total_capacity) * 100}%` }}></div>
+            </div>
+            <button 
+              onClick={() => setSelectedParcelLocker(null)}
+              className="close-btn"
+            >
+              Закрыть
+            </button>
+          </div>
         </div>
       )}
     </div>

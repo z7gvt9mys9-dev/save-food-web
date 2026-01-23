@@ -8,8 +8,8 @@ from datetime import datetime
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 from database import init_db, settings, SessionLocal
-from models import UserDB
-from routes import auth, users, projects, issues, notifications, adminpanel, routing, donations, deliveries
+from models import UserDB, ParcelLockerDB
+from routes import auth, users, projects, issues, notifications, adminpanel, routing, donations, deliveries, parcel_lockers
 from middleware.ban_middleware import BanCheckMiddleware
 from services.routing_service import routing_service
 import bcrypt
@@ -87,11 +87,79 @@ def init_preset_users():
         print(f"Warning: Could not initialize preset users: {e}")
 
 
+def init_preset_parcel_lockers():
+    """Initialize preset parcel locker locations"""
+    try:
+        db = SessionLocal()
+        
+        preset_lockers = [
+            {
+                "name": "Почтомат Красная площадь",
+                "address": "Площадь Красная, 1",
+                "latitude": 55.7536,
+                "longitude": 37.6201,
+                "total_capacity": 50
+            },
+            {
+                "name": "Почтомат Театральная",
+                "address": "Площадь Театральная, 1",
+                "latitude": 55.7604,
+                "longitude": 37.6174,
+                "total_capacity": 40
+            },
+            {
+                "name": "Почтомат Лубянка",
+                "address": "Улица Лубянка, 3",
+                "latitude": 55.7613,
+                "longitude": 37.6274,
+                "total_capacity": 45
+            },
+            {
+                "name": "Почтомат Манежная",
+                "address": "Площадь Манежная, 1",
+                "latitude": 55.7549,
+                "longitude": 37.6069,
+                "total_capacity": 55
+            },
+            {
+                "name": "Почтомат Охотный ряд",
+                "address": "Охотный ряд, 3",
+                "latitude": 55.7571,
+                "longitude": 37.6217,
+                "total_capacity": 35
+            }
+        ]
+        
+        for locker in preset_lockers:
+            existing = db.query(ParcelLockerDB).filter(
+                ParcelLockerDB.name == locker["name"]
+            ).first()
+            if not existing:
+                new_locker = ParcelLockerDB(
+                    name=locker["name"],
+                    address=locker["address"],
+                    latitude=locker["latitude"],
+                    longitude=locker["longitude"],
+                    total_capacity=locker["total_capacity"],
+                    current_occupancy=0,
+                    is_active=True,
+                    created_at=datetime.utcnow(),
+                    updated_at=datetime.utcnow()
+                )
+                db.add(new_locker)
+                db.commit()
+        
+        db.close()
+    except Exception as e:
+        print(f"Warning: Could not initialize preset parcel lockers: {e}")
+
+
 @app.on_event("startup")
 async def startup_event():
     init_db()
     print(f"SQLite3 database initialized (Environment: {settings.environment})")
     init_preset_users()
+    init_preset_parcel_lockers()
     await routing_service.init_session()
     is_healthy = await routing_service.check_valhalla_health()
     if is_healthy:
@@ -144,6 +212,7 @@ app.include_router(adminpanel.router)
 app.include_router(routing.router)
 app.include_router(donations.router)
 app.include_router(deliveries.router)
+app.include_router(parcel_lockers.router)
 
 
 @app.exception_handler(Exception)
