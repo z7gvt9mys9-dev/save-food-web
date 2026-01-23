@@ -123,7 +123,7 @@ schoolProject/
 ## Установка и запуск
 
 ### Требования
-- Node.js 16+ для frontend
+- Node.js 18+ для frontend
 - Python 3.12+ для backend
 - Git
 
@@ -241,10 +241,6 @@ PORT=5000
 - PostgreSQL для production
 - Docker контейнеризация
 - CI/CD pipeline
-
-## Лицензия
-
-MIT License
 
 ## Контакты
 
